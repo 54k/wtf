@@ -1,31 +1,33 @@
 package wtf;
 
+import wtf.model.Authenticator;
+import wtf.model.Lobby;
+import wtf.model.RoomCommandHandler;
+import wtf.model.command.CreateRoomCommand;
+import wtf.model.command.CurrentRoomCommand;
+import wtf.model.command.EnterRoomCommand;
+import wtf.model.command.LeaveRoomCommand;
+import wtf.model.command.LogoutCommand;
+import wtf.model.command.RoomListCommand;
+import wtf.model.command.WhisperCommand;
 import wtf.net.NetworkServer;
-import wtf.room.Authenticator;
-import wtf.room.Room;
-import wtf.room.RoomDispatcher;
 
 public class App {
 
     public static void main(String[] args) {
-        RoomDispatcher roomDispatcher = new RoomDispatcher();
-        roomDispatcher.addRoomCommandHandler("/room", (roomClient, message) -> roomClient.write("You are in " + roomClient.getCurrentRoom().getRoomName()));
-        roomDispatcher.addRoomCommandHandler("/create", (roomClient, message) -> {
-            Room room = roomClient.getCurrentRoom().getRoomDispatcher().createRoom(message[0]);
-            roomClient.enterRoom(room);
-        });
-        roomDispatcher.addRoomCommandHandler("/enter", (roomClient, message) -> {
-            Room room = roomClient.getCurrentRoom().getRoomDispatcher().getRoomByName(message[0]);
-            roomClient.enterRoom(room);
-        });
-        roomDispatcher.addRoomCommandHandler("/leave", (roomClient, message) -> {
-            Room defaultRoom = roomClient.getCurrentRoom().getRoomDispatcher().getDefaultRoom();
-            roomClient.enterRoom(defaultRoom);
-        });
-        roomDispatcher.addRoomCommandHandler("/logout", (roomClient, message) -> roomClient.close());
+        RoomCommandHandler roomCommandHandler = new RoomCommandHandler();
+        roomCommandHandler.addRoomCommand("/whisper", new WhisperCommand());
+        roomCommandHandler.addRoomCommand("/room", new CurrentRoomCommand());
+        roomCommandHandler.addRoomCommand("/rooms", new RoomListCommand());
+        roomCommandHandler.addRoomCommand("/create", new CreateRoomCommand());
+        roomCommandHandler.addRoomCommand("/enter", new EnterRoomCommand());
+        roomCommandHandler.addRoomCommand("/leave", new LeaveRoomCommand());
+        roomCommandHandler.addRoomCommand("/logout", new LogoutCommand());
+
+        Lobby lobby = new Lobby();
 
         NetworkServer networkServer = new NetworkServer();
-        networkServer.onConnection(new Authenticator(roomDispatcher));
+        networkServer.onConnection(new Authenticator(lobby, roomCommandHandler));
         networkServer.bind(8080);
     }
 }

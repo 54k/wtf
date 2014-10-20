@@ -1,4 +1,4 @@
-package wtf.room;
+package wtf.model;
 
 import wtf.net.NetworkChannel;
 import wtf.util.Handler;
@@ -10,9 +10,11 @@ public class Authenticator implements Handler<NetworkChannel> {
 
     private final Handler<RoomClient> roomClientHandler;
     private final Map<String, RoomClient> roomClientsByName = new ConcurrentHashMap<>();
+    private final RoomCommandHandler roomCommandHandler;
 
-    public Authenticator(Handler<RoomClient> roomClientHandler) {
+    public Authenticator(Handler<RoomClient> roomClientHandler, RoomCommandHandler roomCommandHandler) {
         this.roomClientHandler = roomClientHandler;
+        this.roomCommandHandler = roomCommandHandler;
     }
 
     @Override
@@ -25,7 +27,7 @@ public class Authenticator implements Handler<NetworkChannel> {
         if (roomClientsByName.containsKey(name)) {
             networkChannel.write("Name already exists, try again");
         } else {
-            RoomClient roomClient = new RoomClient(name, networkChannel);
+            RoomClient roomClient = new RoomClient(name, networkChannel, roomCommandHandler);
             roomClientsByName.put(roomClient.getName(), roomClient);
             roomClientHandler.handle(roomClient);
         }

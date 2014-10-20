@@ -1,27 +1,19 @@
-package wtf.room;
+package wtf.model;
 
 import wtf.util.Handler;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RoomDispatcher implements Handler<RoomClient> {
+public class Lobby implements Handler<RoomClient> {
 
     private final Room defaultRoom;
     private final Map<String, Room> roomsByName = new ConcurrentHashMap<>();
-    private final Map<String, RoomCommandHandler> roomCommandHandlersByAlias = new ConcurrentHashMap<>();
 
-    public RoomDispatcher() {
+    public Lobby() {
         defaultRoom = new Room(this, "default-room");
         roomsByName.put(defaultRoom.getRoomName(), defaultRoom);
-    }
-
-    public void addRoomCommandHandler(String alias, RoomCommandHandler roomCommandHandler) {
-        roomCommandHandlersByAlias.put(alias, roomCommandHandler);
-    }
-
-    public RoomCommandHandler getRoomCommandHandlerByAlias(String alias) {
-        return roomCommandHandlersByAlias.get(alias);
     }
 
     public Room getDefaultRoom() {
@@ -29,14 +21,20 @@ public class RoomDispatcher implements Handler<RoomClient> {
     }
 
     public Room createRoom(String name) {
+        if (roomsByName.containsKey(name)) {
+            return getRoomByName(name);
+        }
         Room room = new Room(this, name);
-
         roomsByName.put(room.getRoomName(), room);
         return room;
     }
 
     public Room getRoomByName(String name) {
         return roomsByName.get(name);
+    }
+
+    public Map<String, Room> getRooms() {
+        return Collections.unmodifiableMap(roomsByName);
     }
 
     @Override

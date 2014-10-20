@@ -9,7 +9,6 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
@@ -26,7 +25,6 @@ public class NetworkServer {
 
     public NetworkServer() {
         channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-
         serverBootstrap = new ServerBootstrap();
         serverBootstrap.channel(NioServerSocketChannel.class);
         serverBootstrap.group(new NioEventLoopGroup(2, new NamingThreadFactory("network-server")));
@@ -60,8 +58,6 @@ public class NetworkServer {
             ch.pipeline().addLast(new HttpObjectAggregator(65536));
             ch.pipeline().addLast(new WebSocketServerProtocolHandler("/"));
             ch.pipeline().addLast(new WebSocketAcceptor());
-
-            ch.pipeline().addLast(new DelimiterBasedFrameDecoder())
         }
     }
 

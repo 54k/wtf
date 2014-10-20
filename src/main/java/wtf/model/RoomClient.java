@@ -1,4 +1,4 @@
-package wtf.room;
+package wtf.model;
 
 import wtf.net.NetworkChannel;
 
@@ -6,11 +6,13 @@ public class RoomClient {
 
     private final String name;
     private final NetworkChannel networkChannel;
+    private final RoomCommandHandler roomCommandHandler;
     private volatile Room currentRoom;
 
-    RoomClient(String name, NetworkChannel networkChannel) {
+    public RoomClient(String name, NetworkChannel networkChannel, RoomCommandHandler roomCommandHandler) {
         this.name = name;
         this.networkChannel = networkChannel;
+        this.roomCommandHandler = roomCommandHandler;
         init();
     }
 
@@ -37,7 +39,7 @@ public class RoomClient {
 
     private void onMessage(String message) {
         if (currentRoom != null) {
-            currentRoom.handleMessage(this, message);
+            roomCommandHandler.handleMessage(this, message);
         }
     }
 
@@ -46,12 +48,14 @@ public class RoomClient {
             leaveRoom();
         }
         room.addRoomClient(this);
+        roomCommandHandler.onRoomClientRegistered(this, room);
         this.currentRoom = room;
     }
 
     public void leaveRoom() {
         if (currentRoom != null) {
             currentRoom.removeRoomClient(this);
+            roomCommandHandler.onRoomClientUnregistered(this, currentRoom);
         }
         currentRoom = null;
     }
