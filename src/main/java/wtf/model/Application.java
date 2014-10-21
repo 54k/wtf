@@ -7,6 +7,7 @@ import wtf.command.LeaveRoomCommand;
 import wtf.command.LogoutCommand;
 import wtf.command.RoomListCommand;
 import wtf.command.WhisperCommand;
+import wtf.net.NetworkServer;
 
 import java.util.Collections;
 import java.util.Map;
@@ -30,6 +31,12 @@ public class Application implements Lobby, ApplicationListener {
 
         defaultRoom = new Room(this, "main room");
         roomsByName.put(defaultRoom.getRoomName(), defaultRoom);
+    }
+
+    public void start() {
+        NetworkServer networkServer = new NetworkServer();
+        networkServer.onConnection(new Authenticator(this));
+        networkServer.bind(8080);
     }
 
     @Override
