@@ -1,6 +1,6 @@
 package wtf.model;
 
-import wtf.model.command.BroadcastCommand;
+import wtf.command.BroadcastCommand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,21 +8,31 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RoomCommandHandler {
+public class RoomMessageHandlerImpl implements RoomMessageHandler {
 
     private final RoomCommand defaultRoomCommand;
     private final Map<String, RoomCommand> roomCommandsByAlias = new ConcurrentHashMap<>();
     private final MessageHistoryHolder messageHistoryHolder = new MessageHistoryHolder(100);
 
-    public RoomCommandHandler() {
+    public RoomMessageHandlerImpl() {
         this.defaultRoomCommand = new BroadcastCommand(messageHistoryHolder);
     }
 
+    private static void handleMessage(RoomClient roomClient, Scanner scanner, RoomCommand handler) {
+        List<String> args = new ArrayList<>();
+        while (scanner.hasNext()) {
+            args.add(scanner.next());
+        }
+        handler.execute(roomClient, args.toArray(new String[args.size()]));
+    }
+
+    @Override
     public void onRoomClientRegistered(RoomClient roomClient, Room room) {
         messageHistoryHolder.getLastMessagesFor(room).forEach(roomClient::write);
         announce(room, roomClient.getName() + " entered " + room.getRoomName());
     }
 
+    @Override
     public void onRoomClientUnregistered(RoomClient roomClient, Room room) {
         announce(room, roomClient.getName() + " leaved " + room.getRoomName());
     }
@@ -36,6 +46,7 @@ public class RoomCommandHandler {
         roomCommandsByAlias.put(alias, roomCommand);
     }
 
+    @Override
     public void handleMessage(RoomClient roomClient, String message) {
         Scanner scanner = new Scanner(message);
         String alias = scanner.next();
@@ -45,13 +56,5 @@ public class RoomCommandHandler {
         } else {
             defaultRoomCommand.execute(roomClient, message);
         }
-    }
-
-    private static void handleMessage(RoomClient roomClient, Scanner scanner, RoomCommand handler) {
-        List<String> args = new ArrayList<>();
-        while (scanner.hasNext()) {
-            args.add(scanner.next());
-        }
-        handler.execute(roomClient, args.toArray(new String[args.size()]));
     }
 }

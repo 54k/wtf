@@ -6,11 +6,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Room {
 
-    private final Map<String, RoomClient> roomClientsByName = new ConcurrentHashMap<>();
-    private final String roomName;
-    private final Lobby lobby;
+    private Map<String, RoomClient> roomClientsByName = new ConcurrentHashMap<>();
+    private String roomName;
+    private Lobby lobby;
 
-    Room(Lobby lobby, String roomName) {
+    public Room(Lobby lobby, String roomName) {
         this.lobby = lobby;
         this.roomName = roomName;
     }
@@ -27,11 +27,11 @@ public class Room {
         return Collections.unmodifiableMap(roomClientsByName);
     }
 
-    void addRoomClient(RoomClient roomClient) {
+    public void addRoomClient(RoomClient roomClient) {
         roomClientsByName.put(roomClient.getName(), roomClient);
     }
 
-    void removeRoomClient(RoomClient roomClient) {
+    public void removeRoomClient(RoomClient roomClient) {
         roomClientsByName.remove(roomClient.getName(), roomClient);
     }
 }

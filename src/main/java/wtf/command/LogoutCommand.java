@@ -1,4 +1,4 @@
-package wtf.model.command;
+package wtf.command;
 
 import wtf.model.RoomClient;
 import wtf.model.RoomCommand;

@@ -1,4 +1,4 @@
-package wtf.model.command;
+package wtf.command;
 
 import wtf.model.MessageHistoryHolder;
 import wtf.model.Room;

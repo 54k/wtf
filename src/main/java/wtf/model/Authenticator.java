@@ -8,28 +8,37 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Authenticator implements Handler<NetworkChannel> {
 
-    private final Handler<RoomClient> roomClientHandler;
-    private final Map<String, RoomClient> roomClientsByName = new ConcurrentHashMap<>();
-    private final RoomCommandHandler roomCommandHandler;
+    private Map<String, ClientSession> clientSessionByName = new ConcurrentHashMap<>();
+    private ApplicationListener applicationListener;
 
-    public Authenticator(Handler<RoomClient> roomClientHandler, RoomCommandHandler roomCommandHandler) {
-        this.roomClientHandler = roomClientHandler;
-        this.roomCommandHandler = roomCommandHandler;
+    public Authenticator(ApplicationListener applicationListener) {
+        this.applicationListener = applicationListener;
     }
 
     @Override
     public void handle(NetworkChannel networkChannel) {
         networkChannel.write("Please enter your name");
-        networkChannel.onMessage(name -> authenticate(networkChannel, name));
+        networkChannel.onMessage(msg -> handleCredentials(networkChannel, msg));
     }
 
-    private void authenticate(NetworkChannel networkChannel, String name) {
-        if (roomClientsByName.containsKey(name)) {
-            networkChannel.write("Name already exists, try again");
-        } else {
-            RoomClient roomClient = new RoomClient(name, networkChannel, roomCommandHandler);
-            roomClientsByName.put(roomClient.getName(), roomClient);
-            roomClientHandler.handle(roomClient);
+    private void handleCredentials(NetworkChannel networkChannel, String credentials) {
+        if (clientSessionByName.containsKey(credentials)) {
+            networkChannel.write("Name already exists, please try again");
+            return;
         }
+        handleLogIn(networkChannel, credentials);
+    }
+
+    private void handleLogIn(NetworkChannel networkChannel, String credentials) {
+        ClientSessionImpl clientSession = new ClientSessionImpl(credentials, networkChannel);
+        clientSessionByName.put(credentials, clientSession);
+        ClientSessionListener clientSessionListener = applicationListener.onLogIn(clientSession);
+        networkChannel.onMessage(clientSessionListener::onMessage);
+        networkChannel.onClose(v -> handleDisconnect(credentials, clientSessionListener));
+    }
+
+    private void handleDisconnect(String credentials, ClientSessionListener clientSessionListener) {
+        clientSessionByName.remove(credentials);
+        clientSessionListener.onDisconnect();
     }
 }

@@ -1,14 +1,14 @@
-package wtf.model.command;
+package wtf.command;
 
 import wtf.model.Room;
 import wtf.model.RoomClient;
 import wtf.model.RoomCommand;
 
-public class EnterRoomCommand implements RoomCommand {
+public class CreateRoomCommand implements RoomCommand {
 
     @Override
     public void execute(RoomClient roomClient, String... args) {
-        Room room = roomClient.getCurrentRoom().getLobby().getRoomByName(args[0]);
+        Room room = roomClient.getCurrentRoom().getLobby().createRoom(args[0]);
         roomClient.enterRoom(room);
     }
 }
