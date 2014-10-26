@@ -1,13 +1,13 @@
 package wtf.model;
 
-import wtf.net.NetworkChannel;
+import wtf.service.NetworkSession;
 
 public class ClientSessionImpl implements ClientSession {
 
     private String name;
-    private NetworkChannel networkChannel;
+    private NetworkSession networkChannel;
 
-    public ClientSessionImpl(String name, NetworkChannel networkChannel) {
+    public ClientSessionImpl(String name, NetworkSession networkChannel) {
         this.name = name;
         this.networkChannel = networkChannel;
     }

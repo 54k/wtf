@@ -1,4 +1,4 @@
-package wtf.net;
+package wtf.service;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandlerContext;
@@ -16,14 +16,18 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import wtf.util.Handler;
 import wtf.util.NamingThreadFactory;
 
-public class NetworkServer {
+import javax.inject.Inject;
+
+public class NetworkServerImpl implements NetworkServer {
 
     private final ChannelGroup channels;
     private final ServerBootstrap serverBootstrap;
 
-    private Handler<NetworkChannel> channelHandler;
+    private Handler<NetworkSession> channelHandler;
+    @Inject
+    private TaskManager taskManager;
 
-    public NetworkServer() {
+    public NetworkServerImpl() {
         channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
         serverBootstrap = new ServerBootstrap();
         serverBootstrap.channel(NioServerSocketChannel.class);
@@ -46,7 +50,7 @@ public class NetworkServer {
         channels.close().syncUninterruptibly();
     }
 
-    public void onConnection(Handler<NetworkChannel> channelHandler) {
+    public void onConnection(Handler<NetworkSession> channelHandler) {
         this.channelHandler = channelHandler;
     }
 
@@ -67,7 +71,7 @@ public class NetworkServer {
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
             if (evt == WebSocketServerProtocolHandler.ServerHandshakeStateEvent.HANDSHAKE_COMPLETE) {
                 channels.add(ctx.channel());
-                channelHandler.handle(new NetworkChannel(ctx));
+                taskManager.execute(() -> channelHandler.handle(new NetworkSessionImpl(taskManager, ctx)));
             }
         }
     }

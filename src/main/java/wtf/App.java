@@ -1,10 +1,11 @@
 package wtf;
 
-import wtf.model.Application;
+import wtf.model.ChatApplication;
+import wtf.service.Application;
 
 public class App {
 
     public static void main(String[] args) {
-        new Application().start();
+        new Application(new ChatApplication()).start();
     }
 }

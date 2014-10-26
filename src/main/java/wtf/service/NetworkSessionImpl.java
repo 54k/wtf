@@ -1,4 +1,4 @@
-package wtf.net;
+package wtf.service;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -6,30 +6,36 @@ import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import wtf.util.Handler;
 
-public class NetworkChannel {
+public class NetworkSessionImpl implements NetworkSession {
 
     private ChannelHandlerContext ctx;
 
     private Handler<Void> closeHandler;
     private Handler<String> messageHandler;
+    private TaskManager taskManager;
 
-    public NetworkChannel(ChannelHandlerContext ctx) {
+    public NetworkSessionImpl(TaskManager taskManager, ChannelHandlerContext ctx) {
+        this.taskManager = taskManager;
         this.ctx = ctx;
         this.ctx.pipeline().addLast(new WebSocketHandler());
     }
 
+    @Override
     public void write(String msg) {
         ctx.writeAndFlush(new TextWebSocketFrame(msg));
     }
 
+    @Override
     public void close() {
         ctx.writeAndFlush(new CloseWebSocketFrame()).addListener(f -> ctx.close());
     }
 
+    @Override
     public void onMessage(Handler<String> messageHandler) {
         this.messageHandler = messageHandler;
     }
 
+    @Override
     public void onClose(Handler<Void> closeHandler) {
         this.closeHandler = closeHandler;
     }
@@ -43,15 +49,16 @@ public class NetworkChannel {
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
+            String text = msg.text();
             if (messageHandler != null) {
-                messageHandler.handle(msg.text());
+                taskManager.execute(() -> messageHandler.handle(text));
             }
         }
 
         @Override
         public void channelInactive(ChannelHandlerContext ctx) throws Exception {
             if (closeHandler != null) {
-                closeHandler.handle(null);
+                taskManager.execute(() -> closeHandler.handle(null));
             }
         }
     }
