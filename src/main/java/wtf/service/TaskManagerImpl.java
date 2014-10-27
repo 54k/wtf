@@ -7,7 +7,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import wtf.util.NamingThreadFactory;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -16,8 +15,7 @@ public class TaskManagerImpl implements TaskManager {
     private ListeningScheduledExecutorService delegate;
 
     public TaskManagerImpl() {
-        ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1, new NamingThreadFactory("main-eventloop"));
-        delegate = MoreExecutors.listeningDecorator(executor);
+        delegate = MoreExecutors.listeningDecorator(new ScheduledThreadPoolExecutor(1, new NamingThreadFactory("main-eventloop")));
     }
 
     @Override

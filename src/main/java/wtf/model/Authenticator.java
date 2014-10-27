@@ -1,6 +1,5 @@
 package wtf.model;
 
-import wtf.service.ApplicationListener;
 import wtf.service.NetworkSession;
 import wtf.util.Handler;
 
@@ -10,9 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Authenticator implements Handler<NetworkSession> {
 
     private Map<String, ClientSession> clientSessionByName = new ConcurrentHashMap<>();
-    private ApplicationListener applicationListener;
+    private AuthorizationListener applicationListener;
 
-    public Authenticator(ApplicationListener applicationListener) {
+    public Authenticator(AuthorizationListener applicationListener) {
         this.applicationListener = applicationListener;
     }
 

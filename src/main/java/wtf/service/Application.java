@@ -33,6 +33,14 @@ public final class Application extends AbstractModule {
         appListener.onStart();
     }
 
+    public ListenableFuture<?> shutdown() {
+        return taskManager.submit(this::shutdown0);
+    }
+
+    private void shutdown0() {
+        appListener.onShutdown();
+    }
+
     @Override
     protected void configure() {
         bind(TaskManager.class).to(TaskManagerImpl.class).in(Scopes.SINGLETON);

@@ -10,14 +10,13 @@ import wtf.command.RoomListCommand;
 import wtf.command.WhisperCommand;
 import wtf.service.ApplicationListener;
 import wtf.service.NetworkServer;
-import wtf.service.NetworkServerImpl;
 
 import javax.inject.Inject;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ChatApplication extends AbstractModule implements Lobby, ApplicationListener {
+public class ChatApplication extends AbstractModule implements Lobby, ApplicationListener, AuthorizationListener {
 
     private Room defaultRoom;
     private Map<String, Room> roomsByName = new ConcurrentHashMap<>();
@@ -63,7 +62,6 @@ public class ChatApplication extends AbstractModule implements Lobby, Applicatio
     public Map<String, Room> getRooms() {
         return Collections.unmodifiableMap(roomsByName);
     }
-
 
     @Override
     protected void configure() {
