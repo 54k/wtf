@@ -76,7 +76,7 @@ public class ChatApplication extends AbstractModule implements Lobby, Applicatio
     @Override
     public void onStart() {
         networkServer.onConnection(new Authenticator(this));
-        eventBus.register(RoomEventListener.class, commandHandler);
+        eventBus.register(commandHandler);
         defaultRoom = createRoom("main room");
     }
 
