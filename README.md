@@ -1,5 +1,5 @@
 WTF
-===
+---
 
 Simple websocket chat example.
 
