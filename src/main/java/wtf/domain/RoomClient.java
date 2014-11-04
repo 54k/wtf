@@ -4,5 +4,7 @@ public interface RoomClient extends ClientSession {
 
     Room getCurrentRoom();
 
-    void enterRoom(Room room);
+    void joinRoom(Room room);
+
+    void leaveRoom();
 }

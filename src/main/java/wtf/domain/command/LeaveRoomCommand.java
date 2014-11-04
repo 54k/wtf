@@ -9,6 +9,6 @@ public class LeaveRoomCommand implements Command {
     @Override
     public void execute(RoomClient roomClient, String... args) {
         Room defaultRoom = roomClient.getCurrentRoom().getLobby().getDefaultRoom();
-        roomClient.enterRoom(defaultRoom);
+        roomClient.joinRoom(defaultRoom);
     }
 }

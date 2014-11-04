@@ -4,6 +4,8 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -17,61 +19,68 @@ import wtf.util.Handler;
 import wtf.util.NamingThreadFactory;
 
 import javax.inject.Inject;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class NetworkServerImpl implements NetworkServer, NetworkServerInternal {
 
-    private final ChannelGroup channels;
-    private final ServerBootstrap serverBootstrap;
-
-    private Handler<NetworkSession> channelHandler;
     @Inject
     private TaskManager taskManager;
 
+    private final ChannelGroup channelGroup;
+    private final ServerBootstrap bootstrap;
+    private final EventLoopGroup eventLoop;
+    private final AtomicReference<Handler<NetworkSession>> channelHandlerRef;
+
     public NetworkServerImpl() {
-        channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-        serverBootstrap = new ServerBootstrap();
-        serverBootstrap.channel(NioServerSocketChannel.class);
-        serverBootstrap.group(new NioEventLoopGroup(2, new NamingThreadFactory("network-server")));
-        serverBootstrap.childHandler(new TransportInitializer());
+        channelGroup = new DefaultChannelGroup("ALL CHANNELS", GlobalEventExecutor.INSTANCE);
+        eventLoop = new NioEventLoopGroup(2, new NamingThreadFactory("network-server"));
+        channelHandlerRef = new AtomicReference<>();
+
+        bootstrap = new ServerBootstrap();
+        bootstrap.channel(NioServerSocketChannel.class);
+        bootstrap.group(eventLoop);
+        bootstrap.childHandler(new TransportInitializer());
     }
 
     public void bind(int port) {
         validate();
-        channels.add(serverBootstrap.bind(port).syncUninterruptibly().channel());
+        channelGroup.add(bootstrap.bind(port).syncUninterruptibly().channel());
     }
 
     private void validate() {
-        if (channelHandler == null) {
-            throw new IllegalStateException();
+        if (channelHandlerRef.get() == null) {
+            throw new IllegalStateException("channelHandler is not set");
         }
     }
 
     public void shutdown() {
-        channels.close().syncUninterruptibly();
+        channelGroup.close().syncUninterruptibly();
+        eventLoop.shutdownGracefully().syncUninterruptibly();
     }
 
     public void onConnection(Handler<NetworkSession> channelHandler) {
-        this.channelHandler = channelHandler;
+        if (!channelHandlerRef.compareAndSet(null, channelHandler)) {
+            throw new IllegalStateException("channelHandler is already set");
+        }
     }
 
     private class TransportInitializer extends ChannelInitializer<NioSocketChannel> {
-
         @Override
         protected void initChannel(NioSocketChannel ch) throws Exception {
-            ch.pipeline().addLast(new HttpServerCodec());
-            ch.pipeline().addLast(new HttpObjectAggregator(65536));
-            ch.pipeline().addLast(new WebSocketServerProtocolHandler("/"));
-            ch.pipeline().addLast(new WebSocketAcceptor());
+            ChannelPipeline pipeline = ch.pipeline();
+            pipeline.addLast(new HttpServerCodec());
+            pipeline.addLast(new HttpObjectAggregator(65536));
+            pipeline.addLast(new WebSocketServerProtocolHandler("/"));
+            pipeline.addLast(new WebSocketAcceptor());
         }
     }
 
     private class WebSocketAcceptor extends ChannelInboundHandlerAdapter {
-
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
             if (evt == WebSocketServerProtocolHandler.ServerHandshakeStateEvent.HANDSHAKE_COMPLETE) {
-                channels.add(ctx.channel());
-                taskManager.execute(() -> channelHandler.handle(new NetworkSessionImpl(taskManager, ctx)));
+                channelGroup.add(ctx.channel());
+                taskManager.execute(() -> channelHandlerRef.get().handle(new NetworkSessionImpl(taskManager, ctx)));
             }
         }
     }

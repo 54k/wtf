@@ -2,12 +2,8 @@ package wtf.kernel;
 
 import wtf.util.TypedEventBus;
 
-import javax.inject.Inject;
-
 public class EventBusImpl implements EventBus {
 
-    @Inject
-    private TaskManager taskManager;
     private final TypedEventBus typedEventBus;
 
     public EventBusImpl() {

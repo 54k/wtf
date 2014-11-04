@@ -17,7 +17,7 @@ public class RoomClientImpl implements RoomClient, ClientSessionListener {
     }
 
     @Override
-    public void enterRoom(Room room) {
+    public void joinRoom(Room room) {
         if (this.currentRoom != null) {
             leaveRoom();
         }
@@ -25,7 +25,8 @@ public class RoomClientImpl implements RoomClient, ClientSessionListener {
         this.currentRoom = room;
     }
 
-    private void leaveRoom() {
+    @Override
+    public void leaveRoom() {
         if (currentRoom != null) {
             currentRoom.removeRoomClient(this);
             currentRoom = null;

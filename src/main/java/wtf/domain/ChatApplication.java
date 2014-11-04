@@ -20,16 +20,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ChatApplication extends AbstractModule implements Lobby, ApplicationListener, LoginListener {
 
-    private Room defaultRoom;
-    private Map<String, Room> roomsByName = new ConcurrentHashMap<>();
-    private CommandHandlerImpl commandHandler;
-
     @Inject
     private NetworkServer networkServer;
     @Inject
     private EventBus eventBus;
     @Inject
     private Injector injector;
+
+    private Room defaultRoom;
+    private Map<String, Room> roomsByName = new ConcurrentHashMap<>();
+    private CommandHandlerImpl commandHandler;
 
     public ChatApplication() {
         commandHandler = new CommandHandlerImpl();
@@ -83,7 +83,7 @@ public class ChatApplication extends AbstractModule implements Lobby, Applicatio
     @Override
     public ClientSessionListener onLogin(ClientSession clientSession) {
         RoomClientImpl roomClient = new RoomClientImpl(clientSession, commandHandler);
-        roomClient.enterRoom(defaultRoom);
+        roomClient.joinRoom(defaultRoom);
         return roomClient;
     }
 }

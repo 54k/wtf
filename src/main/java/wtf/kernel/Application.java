@@ -9,7 +9,6 @@ import com.google.inject.Scopes;
 
 import javax.inject.Inject;
 
-
 public class Application extends AbstractModule {
 
     private final ApplicationListener appListener;
@@ -18,7 +17,7 @@ public class Application extends AbstractModule {
     @Inject
     private TaskManager taskManager;
     @Inject
-    private NetworkServer networkServerInternal;
+    private NetworkServer networkServer;
 
     public Application(ApplicationListener applicationListener) {
         Preconditions.checkNotNull(applicationListener);
@@ -34,13 +33,13 @@ public class Application extends AbstractModule {
     private void start0(int port) {
         injector.injectMembers(appListener);
         appListener.onStart();
-        ((NetworkServerInternal) networkServerInternal).bind(port);
+        ((NetworkServerInternal) networkServer).bind(port);
     }
 
     @Override
     protected void configure() {
+        bind(EventBus.class).to(EventBusImpl.class).in(Scopes.SINGLETON);
         bind(TaskManager.class).to(TaskManagerImpl.class).in(Scopes.SINGLETON);
         bind(NetworkServer.class).to(NetworkServerImpl.class).in(Scopes.SINGLETON);
-        bind(EventBus.class).to(EventBusImpl.class).in(Scopes.SINGLETON);
     }
 }

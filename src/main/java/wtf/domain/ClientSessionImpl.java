@@ -5,11 +5,11 @@ import wtf.kernel.NetworkSession;
 public class ClientSessionImpl implements ClientSession {
 
     private String name;
-    private NetworkSession networkChannel;
+    private NetworkSession networkSession;
 
-    public ClientSessionImpl(String name, NetworkSession networkChannel) {
+    public ClientSessionImpl(String name, NetworkSession networkSession) {
         this.name = name;
-        this.networkChannel = networkChannel;
+        this.networkSession = networkSession;
     }
 
     @Override
@@ -19,11 +19,11 @@ public class ClientSessionImpl implements ClientSession {
 
     @Override
     public void write(String msg) {
-        networkChannel.write(msg);
+        networkSession.write(msg);
     }
 
     @Override
     public void close() {
-        networkChannel.close();
+        networkSession.close();
     }
 }

@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class TypedEventBus {
+public final class TypedEventBus {
 
     private final Map<Class<?>, Dispatcher> dispatcherByType = new ConcurrentHashMap<>();
 

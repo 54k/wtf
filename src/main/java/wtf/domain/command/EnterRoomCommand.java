@@ -9,6 +9,6 @@ public class EnterRoomCommand implements Command {
     @Override
     public void execute(RoomClient roomClient, String... args) {
         Room room = roomClient.getCurrentRoom().getLobby().getRoomByName(args[0]);
-        roomClient.enterRoom(room);
+        roomClient.joinRoom(room);
     }
 }
