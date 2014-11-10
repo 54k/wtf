@@ -84,7 +84,7 @@ public class NetworkServerImpl implements NetworkServer, NetworkServerInternal {
 		public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
 			if (evt == WebSocketServerProtocolHandler.ServerHandshakeStateEvent.HANDSHAKE_COMPLETE) {
 				channelGroup.add(ctx.channel());
-				taskManager.execute(() -> channelHandlerRef.get().handle(new NetworkSessionImpl(taskManager::execute, ctx)));
+				taskManager.execute(() -> channelHandlerRef.get().handle(new NetworkSessionImpl(1, ctx.channel())));
 			}
 		}
 	}
