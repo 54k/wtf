@@ -11,7 +11,7 @@ import wtf.domain.command.RoomListCommand;
 import wtf.domain.command.WhisperCommand;
 import wtf.kernel.ApplicationListener;
 import wtf.kernel.EventBus;
-import wtf.kernel.NetworkServer;
+import wtf.kernel.network.NetworkServer;
 
 import javax.inject.Inject;
 import java.util.Collections;

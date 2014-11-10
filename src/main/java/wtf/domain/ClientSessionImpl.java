@@ -1,6 +1,6 @@
 package wtf.domain;
 
-import wtf.kernel.NetworkSession;
+import wtf.kernel.network.NetworkSession;
 
 public class ClientSessionImpl implements ClientSession {
 
@@ -19,7 +19,7 @@ public class ClientSessionImpl implements ClientSession {
 
     @Override
     public void write(String msg) {
-        networkSession.write(msg);
+        networkSession.send(msg);
     }
 
     @Override

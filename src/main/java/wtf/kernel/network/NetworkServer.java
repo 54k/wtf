@@ -1,4 +1,4 @@
-package wtf.kernel;
+package wtf.kernel.network;
 
 import wtf.util.Handler;
 

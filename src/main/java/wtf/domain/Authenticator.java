@@ -1,6 +1,6 @@
 package wtf.domain;
 
-import wtf.kernel.NetworkSession;
+import wtf.kernel.network.NetworkSession;
 import wtf.util.Handler;
 
 import java.util.Map;
@@ -18,13 +18,13 @@ public class Authenticator implements Handler<NetworkSession> {
 
     @Override
     public void handle(NetworkSession networkChannel) {
-        networkChannel.write("Please enter your name");
-        networkChannel.onMessage(msg -> handleCredentials(networkChannel, msg));
+        networkChannel.send("Please enter your name");
+        networkChannel.setMessageHandler(msg -> handleCredentials(networkChannel, msg));
     }
 
     private void handleCredentials(NetworkSession networkChannel, String credentials) {
         if (clientSessionByName.containsKey(credentials)) {
-            networkChannel.write("Name already exists, please try again");
+            networkChannel.send("Name already exists, please try again");
             return;
         }
         handleLogIn(networkChannel, credentials);
@@ -34,8 +34,8 @@ public class Authenticator implements Handler<NetworkSession> {
         ClientSessionImpl clientSession = new ClientSessionImpl(credentials, networkChannel);
         clientSessionByName.put(credentials, clientSession);
         ClientSessionListener clientSessionListener = loginListener.onLogin(clientSession);
-        networkChannel.onMessage(clientSessionListener::onMessage);
-        networkChannel.onClose(v -> handleDisconnect(credentials, clientSessionListener));
+        networkChannel.setMessageHandler(clientSessionListener::onMessage);
+        networkChannel.setCloseHandler(v -> handleDisconnect(credentials, clientSessionListener));
     }
 
     private void handleDisconnect(String credentials, ClientSessionListener clientSessionListener) {

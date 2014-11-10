@@ -6,6 +6,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
+import wtf.kernel.network.NetworkServer;
+import wtf.kernel.network.impl.NetworkServerImpl;
+import wtf.kernel.network.internal.NetworkServerInternal;
 
 import javax.inject.Inject;
 
