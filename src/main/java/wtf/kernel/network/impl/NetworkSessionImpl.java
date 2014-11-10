@@ -28,6 +28,8 @@ public class NetworkSessionImpl implements NetworkSession {
 		Preconditions.checkNotNull(id);
 		Preconditions.checkNotNull(channel);
 
+		executor = channel.eventLoop();
+
 		this.id = id;
 		this.channel = channel;
 		this.channel.pipeline().addLast(new WebSocketFrameHandler());
