@@ -1,4 +1,4 @@
-Simple websocket chat build on top of netty library and some DDD flavour.
+Simple websocket chat on top of netty library and some DDD flavour.
 ======
 Features:
 - websocket connection, every simple websocket test page works as a client, e.g. https://www.piesocket.com/websocket-tester
